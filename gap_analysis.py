@@ -75,9 +75,10 @@ def main():
 			print(f"\nProcessing '{az_service_name}'...")
 
 			for i, tf_resource_name in enumerate(content[az_service_name]):
-				print(f"\tSearching for '{tf_resource_name}'")
+				print(f"\tSearching for '{tf_resource_name}'...", end='')
 
 				found_articles = bing.find_articles(tf_resource_name)
+				print(f"{len(found_articles)} search result(s).")
 				az_service.add_search_results(tf_resource_name=tf_resource_name, article_urls=found_articles)
 
 			az_services.append(az_service)
