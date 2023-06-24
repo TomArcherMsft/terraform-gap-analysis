@@ -1,12 +1,30 @@
-import openpyxl as excel
+import openpyxl as Excel
+from openpyxl.styles import Alignment
+from openpyxl.utils import get_column_letter
 
 class ExcelWriter:
 
 	def __init__(self, az_services):
-		self.wb = excel.Workbook()
+		self.wb = Excel.Workbook()
 		self.az_services = az_services
 
+	def _auto_size_columns(self):
+		for sheet_name in self.wb.sheetnames:
+			for column_cells in self.wb[sheet_name].columns:
+				#new_column_width = max(len(str(cell.value)) for cell in column_cells)
+				new_column_width = 0
+				for cell in column_cells:
+					if cell.value and len(cell.value):
+						lines = cell.value.splitlines()
+						for line in lines:
+							new_column_width = max(len(str(line)), new_column_width)
+
+				new_column_letter = (get_column_letter(column_cells[0].column))
+				if new_column_width > 0:
+					self.wb[sheet_name].column_dimensions[new_column_letter].width = new_column_width #* 1.23
+
 	def save(self, file_name):
+		self._auto_size_columns()
 		self.wb.save(file_name)
 
 	def write_sheet_azure_services(self):
@@ -31,7 +49,7 @@ class ExcelWriter:
 
 			# Write article count.
 			c = sheet.cell(row = row, column = 2)
-			c.value = f"{len(az_service.articles)}"
+			c.value = len(az_service.articles)
 
 			found_articles = ''
 			for article_url in az_service.articles:
@@ -39,7 +57,9 @@ class ExcelWriter:
 					found_articles += '\n' #'\015'
 				found_articles += f"{article_url}"
 
+			# Write article URLs.
 			c = sheet.cell(row = row, column = 3)
+			c.alignment = Alignment(wrapText=True)
 			c.value = f"{found_articles}"
 
 			row += 1

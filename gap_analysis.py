@@ -11,9 +11,7 @@ content = json.loads(raw)
 
 az_services = []
 
-service_excludes = [
-	'AAD B2C',
-]
+service_excludes = []
 
 article_excludes = [
 	'https://learn.microsoft.com/en-us/answers',
