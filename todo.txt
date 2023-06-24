@@ -1,5 +1,4 @@
 excel
-	center #'s
-	create filter on tabs 1 & 2
+	create table on tabs 1 & 2
 create exe
 run against filename passed on command line

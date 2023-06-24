@@ -1,6 +1,7 @@
 import openpyxl as Excel
 from openpyxl.styles import Alignment
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.table import Table, TableStyleInfo
 
 class ExcelWriter:
 
@@ -31,6 +32,8 @@ class ExcelWriter:
 		self.wb.save(file_name)
 
 	def write_sheet_azure_services(self):
+		'''Write Azure services worksheet sheet.'''
+
 		# Get workbook active sheet from the active attribute.
 		sheet = self.wb.active
 		sheet.title = 'Azure services'
@@ -67,11 +70,31 @@ class ExcelWriter:
 			c.alignment = Alignment(wrapText=True)
 			c.value = f"{found_articles}"
 
+			# Increment row number.
 			row_number += 1
 
-	def _write_tf_resource_row(self, sheet, row_number, az_service, tf_resource_name, article_url=None):
-		# TODO: Use a packed param here and enumerate each column
+		# Create table.
+		table = self._create_table('AzureServicesArticles', row_number - 1)
 
+		# Add table to sheet.
+		sheet.add_table(table)
+
+	def _create_table(self, table_name, row_count):
+		'''Create and return a table with the given name and row count.'''
+
+		# Create table.
+		table = Table(displayName=table_name, ref=f"A1:C{row_count}")
+
+		# Create a style with striped rows and banded columns
+		style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
+													showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
+		# Apply table style.
+		table.tableStyleInfo = style
+
+		return table		
+
+	def _write_tf_resource_row(self, sheet, row_number, az_service, tf_resource_name, article_url=None):
 		# Write Azure service name.
 		c = sheet.cell(row_number, column = 1)
 		c.value = f"{az_service.name}"
@@ -122,14 +145,19 @@ class ExcelWriter:
 				self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
 				row_number += 1
 
+		# Create table.
+		table = self._create_table('TerraformServicesSearchResults', row_number - 1)
+
+		# Add table to sheet.
+		sheet.add_table(table)
+
 	def write_sheet_excluded_articles(self, excluded_articles):
 		# Write excluded articles to a new sheet.
 		sheet = self.wb.create_sheet(title='Excluded articles')
 
 		c = sheet.cell(row = 1, column = 1)
-		c.value = f"Excluded articles"
+		c.value = f"Articles excluded from search results."
 		
 		for row_number, article_url in enumerate(excluded_articles, start=2):
-			
 			c = sheet.cell(row_number, column = 1)
 			c.value = f"{article_url}*"
