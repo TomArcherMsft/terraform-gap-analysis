@@ -52,6 +52,7 @@ class ExcelWriter:
 
 			# Write article count.
 			c = sheet.cell(row_number, column = 2)
+			c.alignment = Alignment(horizontal='center')
 			c.value = len(az_service.articles)
 
 			# Format found articles into single string with newline delimiter.

@@ -14,7 +14,7 @@ az_services = []
 
 # TODO: Specify Azure service names to skip - useful for debugging.
 service_excludes = []
-# service_excludes = ['API Management', ]
+#service_excludes = ['API Management', ]
 
 article_excludes = [
 	'https://learn.microsoft.com/en-us/answers',
