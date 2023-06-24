@@ -2,6 +2,7 @@ from pathlib import Path
 import json
 import bing
 from excel import ExcelWriter
+from colorama import Fore, Back, Style
   
 INPUT_FILE = 'azurerm.json'
 
@@ -11,7 +12,9 @@ content = json.loads(raw)
 
 az_services = []
 
+# TODO: Specify Azure service names to skip - useful for debugging.
 service_excludes = []
+# service_excludes = ['API Management', ]
 
 article_excludes = [
 	'https://learn.microsoft.com/en-us/answers',
@@ -63,6 +66,8 @@ def write_to_excel():
 def main():
 	count_az_services = 0
 
+	print(Fore.WHITE)
+
 	for az_service_name in content:
 		if not az_service_name in service_excludes:
 			az_service = AzureService(name=az_service_name)
@@ -80,10 +85,11 @@ def main():
 			count_az_services += 1
 			
 			# TODO: Use this to speed up testing.
-			if count_az_services == 1:
+			if count_az_services == -1:
 				break
 		else:
-			print(f"\nSkipping '{az_service_name}'")
+			print(Fore.GREEN + f"\nSkipping '{az_service_name}'")
+			print(Fore.WHITE)
 			
 	write_to_excel()
 

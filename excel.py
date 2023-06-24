@@ -14,10 +14,13 @@ class ExcelWriter:
 				#new_column_width = max(len(str(cell.value)) for cell in column_cells)
 				new_column_width = 0
 				for cell in column_cells:
-					if cell.value and len(cell.value):
+					#print(f"Type:'{cell.data_type}' - Value:'{cell.value}'")
+					if cell.data_type == 's':
 						lines = cell.value.splitlines()
 						for line in lines:
 							new_column_width = max(len(str(line)), new_column_width)
+					elif cell.data_type == 'n':
+						new_column_width = max(len(str(cell.value)), new_column_width)
 
 				new_column_letter = (get_column_letter(column_cells[0].column))
 				if new_column_width > 0:
@@ -33,24 +36,25 @@ class ExcelWriter:
 		sheet.title = 'Azure services'
 
 		# Write header.
-		row = 1
-		c = sheet.cell(row = row, column = 1)
+		row_number = 1
+		c = sheet.cell(row_number, column = 1)
 		c.value = 'Azure service'
-		c = sheet.cell(row = row, column = 2)
+		c = sheet.cell(row_number, column = 2)
 		c.value = 'Article count'
-		c = sheet.cell(row = row, column = 3)
+		c = sheet.cell(row_number, column = 3)
 		c.value = f"Terraform (azurerm) articles for Azure service"
 
-		row = 2
+		row_number = 2
 		for az_service in self.az_services:
 			# Write Azure service name.
-			c = sheet.cell(row = row, column = 1)
+			c = sheet.cell(row_number, column = 1)
 			c.value = f"{az_service.name}"
 
 			# Write article count.
-			c = sheet.cell(row = row, column = 2)
+			c = sheet.cell(row_number, column = 2)
 			c.value = len(az_service.articles)
 
+			# Format found articles into single string with newline delimiter.
 			found_articles = ''
 			for article_url in az_service.articles:
 				if len(found_articles):
@@ -58,30 +62,30 @@ class ExcelWriter:
 				found_articles += f"{article_url}"
 
 			# Write article URLs.
-			c = sheet.cell(row = row, column = 3)
+			c = sheet.cell(row_number, column = 3)
 			c.alignment = Alignment(wrapText=True)
 			c.value = f"{found_articles}"
 
-			row += 1
+			row_number += 1
 
-	def _write_tf_resource_row(self, sheet, row, az_service, tf_resource_name, article_url=None):
+	def _write_tf_resource_row(self, sheet, row_number, az_service, tf_resource_name, article_url=None):
 		# TODO: Use a packed param here and enumerate each column
 
 		# Write Azure service name.
-		c = sheet.cell(row = row, column = 1)
+		c = sheet.cell(row_number, column = 1)
 		c.value = f"{az_service.name}"
 
 		# Write article count.
-		c = sheet.cell(row = row, column = 2)
+		c = sheet.cell(row_number, column = 2)
 		c.value = f"{tf_resource_name}"
 
 		# Write article URL.
 		if article_url:
-			c = sheet.cell(row = row, column = 3)
+			c = sheet.cell(row_number, column = 3)
 			c.value = f"{article_url}"
 
 		# Write article (Y/N).
-		c = sheet.cell(row = row, column = 4)
+		c = sheet.cell(row_number, column = 4)
 		if article_url and not az_service.is_article_excluded(article_url):
 			c.value = f"Y"
 		else:
@@ -92,30 +96,30 @@ class ExcelWriter:
 		sheet = self.wb.create_sheet(title='Terraform resources')
 
 		# Write header.
-		row = 1
-		c = sheet.cell(row = row, column = 1)
+		row_number = 1
+		c = sheet.cell(row_number, column = 1)
 		c.value = 'Azure service'
-		c = sheet.cell(row = row, column = 2)
+		c = sheet.cell(row_number, column = 2)
 		c.value = 'azurerm resource name'
-		c = sheet.cell(row = row, column = 3)
+		c = sheet.cell(row_number, column = 3)
 		c.value = 'Article that contains the azurerm resource name'
-		c = sheet.cell(row = row, column = 4)
+		c = sheet.cell(row_number, column = 4)
 		c.value = 'Article (Y/N)'
 
-		row = 2
+		row_number = 2
 		for az_service in self.az_services:
 			if len(az_service.search_results):
 				for tf_resource_name, article_urls in az_service.search_results.items():
 					if len(article_urls):
 						for article_url in article_urls:
-							self._write_tf_resource_row(sheet, row, az_service, tf_resource_name, article_url)
-							row += 1
+							self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name, article_url)
+							row_number += 1
 					else:
-						self._write_tf_resource_row(sheet, row, az_service, tf_resource_name)
-						row += 1
+						self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
+						row_number += 1
 			else:
-				self._write_tf_resource_row(sheet, row, az_service, tf_resource_name)
-				row += 1
+				self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
+				row_number += 1
 
 	def write_sheet_excluded_articles(self, excluded_articles):
 		# Write excluded articles to a new sheet.
@@ -124,7 +128,7 @@ class ExcelWriter:
 		c = sheet.cell(row = 1, column = 1)
 		c.value = f"Excluded articles"
 		
-		for row, article_url in enumerate(excluded_articles, start=2):
+		for row_number, article_url in enumerate(excluded_articles, start=2):
 			
-			c = sheet.cell(row = row, column = 1)
+			c = sheet.cell(row_number, column = 1)
 			c.value = f"{article_url}*"
