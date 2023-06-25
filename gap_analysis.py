@@ -14,7 +14,7 @@ az_services = []
 
 # TODO: Specify Azure service names to skip - useful for debugging.
 service_excludes = []
-#service_excludes = ['API Management', ]
+service_excludes = ['API Management', ]
 
 article_excludes = [
 	'https://learn.microsoft.com/en-us/answers',
@@ -87,8 +87,8 @@ def main():
 			count_az_services += 1
 			
 			# TODO: Use this to speed up testing.
-			#if count_az_services == 1:
-			#	break
+			if count_az_services == 11:
+				break
 		else:
 			print(Fore.BLUE + f"\nSkipping '{az_service_name}'")
 			print(Fore.WHITE)

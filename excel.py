@@ -25,10 +25,15 @@ class ExcelWriter:
 							new_column_width = max(len(str(line)), new_column_width)
 					elif cell.data_type == 'n':
 						new_column_width = max(len(str(cell.value)), new_column_width)
+					else:
+						# This cell is probably a formula.
+						# Therefore, use a larger number than we'll ever have
+						# as the max length.
+						new_column_width = max(len(str('99.99%')), new_column_width)
 
 				new_column_letter = (get_column_letter(column_cells[0].column))
 				if new_column_width > 0:
-					self.wb[sheet_name].column_dimensions[new_column_letter].width = new_column_width #* 1.23
+					self.wb[sheet_name].column_dimensions[new_column_letter].width = new_column_width * 1.23
 
 	def save(self, file_name):
 		self._auto_size_columns()
@@ -190,11 +195,11 @@ class ExcelWriter:
 
 		# Create a style with striped rows and banded columns
 		style = TableStyleInfo(
-			name="TableStyleMedium9", 
+			name="TableStyleMedium2", 
 			showFirstColumn=False,
 			showLastColumn=False, 
 			showRowStripes=True, 
-			showColumnStripes=True)
+			showColumnStripes=False)
 
 		# Apply table style.
 		table.tableStyleInfo = style
