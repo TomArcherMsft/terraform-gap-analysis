@@ -55,6 +55,8 @@ class ExcelWriter:
 		for row in data:
 			sheet.append(row)
 
+		sheet['B3'].number_format = '0.0%'
+
 	def _write_sheet_azure_services(self):
 		'''Write Azure services worksheet sheet.'''
 
