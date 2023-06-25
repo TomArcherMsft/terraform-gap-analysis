@@ -9,6 +9,11 @@ class ExcelWriter:
 		self.wb = Excel.Workbook()
 		self.az_services = az_services
 
+		# Get workbook active sheet from the active attribute.
+		sheet = self.wb.active
+		# The first sheet will be the data summary sheet.
+		sheet.title = 'Summary'
+
 	def _auto_size_columns(self):
 		for sheet_name in self.wb.sheetnames:
 			for column_cells in self.wb[sheet_name].columns:
@@ -31,12 +36,30 @@ class ExcelWriter:
 		self._auto_size_columns()
 		self.wb.save(file_name)
 
-	def write_sheet_azure_services(self):
+	def write_data(self, article_excludes):
+		self._write_sheet_azure_services()
+		self._write_sheet_terraform_resources()
+		self._write_sheet_excluded_articles(article_excludes)
+		self._write_sheet_summary()
+
+	def _write_sheet_summary(self):
+		sheet = self.wb['Summary']
+
+		# Write summary data.
+		data = [
+			['Total Azure services', '=COUNTA(AzureServicesArticles[Azure service])',],
+			['Azure services with articles', '=COUNTIF(AzureServicesArticles[Article count],\">0\")',],
+			['% Completion', '=B2/B1',],
+		]
+
+		for row in data:
+			sheet.append(row)
+
+	def _write_sheet_azure_services(self):
 		'''Write Azure services worksheet sheet.'''
 
-		# Get workbook active sheet from the active attribute.
-		sheet = self.wb.active
-		sheet.title = 'Azure services'
+		# Create worksheet.
+		sheet = self.wb.create_sheet(title='Azure services')
 
 		# Write header.
 		row_number = 1
@@ -47,8 +70,12 @@ class ExcelWriter:
 		c = sheet.cell(row_number, column = 3)
 		c.value = f"Terraform (azurerm) articles for Azure service"
 
+		# Set row number to 2 to skip header.
 		row_number = 2
+
+		# For each Azure service.
 		for az_service in self.az_services:
+
 			# Write Azure service name.
 			c = sheet.cell(row_number, column = 1)
 			c.value = f"{az_service.name}"
@@ -94,29 +121,31 @@ class ExcelWriter:
 
 		return table		
 
-	def _write_tf_resource_row(self, sheet, row_number, az_service, tf_resource_name, article_url=None):
-		# Write Azure service name.
-		c = sheet.cell(row_number, column = 1)
-		c.value = f"{az_service.name}"
+	def _write_sheet_terraform_resources(self):
+		'''Write Terraform resources worksheet sheet.'''
 
-		# Write article count.
-		c = sheet.cell(row_number, column = 2)
-		c.value = f"{tf_resource_name}"
+		def _write_tf_resource_row(sheet, row_number, az_service, tf_resource_name, article_url=None):
+			# Write Azure service name.
+			c = sheet.cell(row_number, column = 1)
+			c.value = f"{az_service.name}"
 
-		# Write article URL.
-		if article_url:
-			c = sheet.cell(row_number, column = 3)
-			c.value = f"{article_url}"
+			# Write article count.
+			c = sheet.cell(row_number, column = 2)
+			c.value = f"{tf_resource_name}"
 
-		# Write article (Y/N).
-		c = sheet.cell(row_number, column = 4)
-		if article_url and not az_service.is_article_excluded(article_url):
-			c.value = f"Y"
-		else:
-			c.value = f"N"
+			# Write article URL.
+			if article_url:
+				c = sheet.cell(row_number, column = 3)
+				c.value = f"{article_url}"
 
-	def write_sheet_terraform_resources(self):
-		# Get workbook active sheet from the active attribute.
+			# Write article (Y/N).
+			c = sheet.cell(row_number, column = 4)
+			if article_url and not az_service.is_article_excluded(article_url):
+				c.value = f"Y"
+			else:
+				c.value = f"N"
+
+		# Create worksheet.
 		sheet = self.wb.create_sheet(title='Terraform resources')
 
 		# Write header.
@@ -136,13 +165,13 @@ class ExcelWriter:
 				for tf_resource_name, article_urls in az_service.search_results.items():
 					if len(article_urls):
 						for article_url in article_urls:
-							self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name, article_url)
+							_write_tf_resource_row(sheet, row_number, az_service, tf_resource_name, article_url)
 							row_number += 1
 					else:
-						self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
+						_write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
 						row_number += 1
 			else:
-				self._write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
+				_write_tf_resource_row(sheet, row_number, az_service, tf_resource_name)
 				row_number += 1
 
 		# Create table.
@@ -151,7 +180,7 @@ class ExcelWriter:
 		# Add table to sheet.
 		sheet.add_table(table)
 
-	def write_sheet_excluded_articles(self, excluded_articles):
+	def _write_sheet_excluded_articles(self, excluded_articles):
 		# Write excluded articles to a new sheet.
 		sheet = self.wb.create_sheet(title='Excluded articles')
 

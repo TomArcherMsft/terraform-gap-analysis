@@ -58,10 +58,11 @@ def dump_azure_services(*az_service_names):
 
 def write_to_excel():
 	excelWriter = ExcelWriter(az_services)
-	excelWriter.write_sheet_azure_services()
-	excelWriter.write_sheet_terraform_resources()
-	excelWriter.write_sheet_excluded_articles(article_excludes)
-	excelWriter.save(f"{Path(__file__).stem}.xlsx")
+	excelWriter.write_data(article_excludes)
+
+	file_name = f"{Path(__file__).stem}.xlsx"
+	excelWriter.save(file_name)
+	print(Fore.GREEN + f"\nGap analysis report generated: '{file_name}'")
 
 def main():
 	count_az_services = 0
@@ -86,12 +87,13 @@ def main():
 			count_az_services += 1
 			
 			# TODO: Use this to speed up testing.
-			if count_az_services == -1:
-				break
+			#if count_az_services == 1:
+			#	break
 		else:
-			print(Fore.GREEN + f"\nSkipping '{az_service_name}'")
+			print(Fore.BLUE + f"\nSkipping '{az_service_name}'")
 			print(Fore.WHITE)
 			
 	write_to_excel()
 
+	print(Fore.WHITE)
 main()

@@ -1,4 +1,3 @@
-excel
-	create table on tabs 1 & 2
+write summary worksheet
 create exe
 run against filename passed on command line
