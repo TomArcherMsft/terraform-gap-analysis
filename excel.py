@@ -17,10 +17,8 @@ class ExcelWriter:
 	def _auto_size_columns(self):
 		for sheet_name in self.wb.sheetnames:
 			for column_cells in self.wb[sheet_name].columns:
-				#new_column_width = max(len(str(cell.value)) for cell in column_cells)
 				new_column_width = 0
 				for cell in column_cells:
-					#print(f"Type:'{cell.data_type}' - Value:'{cell.value}'")
 					if cell.data_type == 's':
 						lines = cell.value.splitlines()
 						for line in lines:
@@ -56,6 +54,76 @@ class ExcelWriter:
 			sheet.append(row)
 
 		sheet['B3'].number_format = '0.0%'
+
+		c = sheet.cell(row=1, column=4)
+		c.value = 'Azure Service & Terraform Article Gap Analysis'
+		c.font = Excel.styles.Font(size=16, bold=True)
+
+		c = sheet.cell(row=2, column=4)
+		c.value = 'This report shows the percentage of (Terraform-supported) Azure services for which a Terraform article is published.'
+		
+		c = sheet.cell(row=4, column=4)
+		c.value = '\"Terraform-supported\" means having support via one or more Terraform resources in the azurerm provider.'
+
+		c = sheet.cell(row=5, column=4)
+		c.value = 'The other Terraform Azure providers (e.g., azuread) will be included in future reports.'
+
+		# Write FAQ for purpose of report.
+		c = sheet.cell(row=7, column=4)
+		c.value = 'Questions that are answered via this report:'
+		c.font = Excel.styles.Font(size=16, bold=True)
+
+		c = sheet.cell(row=8, column=4)
+		c.value = 'Q: What is the purpose of this report?'
+		c = sheet.cell(row=9, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: To determine which Azure services do not have Terraform articles.\n'
+		c.value += 'This information can help us to prioritize writing new Terraform samples and articles.'
+
+		c = sheet.cell(row=11, column=4)
+		c.value = 'Q: What percentage of Azure services have or don\'t have Terraform articles?'
+		c = sheet.cell(row=12, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: See the \"% Completion\" value in cell B3.'
+
+		c = sheet.cell(row=14, column=4)
+		c.value = 'Q: Which Azure services have or don\'t have Terraform articles?'
+		c = sheet.cell(row=15, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: The \"Azure services\" tab lists the Terraform article URLs for each Azure service.'
+
+		c = sheet.cell(row=17, column=4)
+		c.value = 'Q: How can I see which Terraform articles contain specific Terraform resources?'
+		c = sheet.cell(row=18, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: The \"Terraform resources\" tab shows - for each Terraform resource - every article containing the resource name.\n'
+		c.value += 'The \"Article (Y/N)\" column indicates whether the article is included in the report.\n'
+		c.value += 'The \"Excluded articles\" tab lists the articles that are excluded from the report.'
+
+		# Write FAQ for report's data.
+		c = sheet.cell(row=20, column=4)
+		c.value = 'Questions about the data:'
+		c.font = Excel.styles.Font(size=16, bold=True)
+
+		c = sheet.cell(row=21, column=4)
+		c.value = 'Q: Where does the list of Azure services come from?'
+		c = sheet.cell(row=22, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: Currently, from the azurerm reference documentation TOC on the HashiCorp site.\n'
+		c.value += 'A future version of this report will retrieve the info from an API provided by the Terraform dev team.'
+
+		c = sheet.cell(row=24, column=4)
+		c.value = 'Q: What is the definition of a Terraform article?'
+		c = sheet.cell(row=25, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: If an article contains a Terraform resource name and the article is not in the \"Excluded articles\" tab,\n'
+		c.value += 'the article is counted as a Terraform article for the Azure service associated with the Terraform resource.'
+
+		c = sheet.cell(row=27, column=4)
+		c.value = 'Q: How do you determine if a Terraform resource is in an article?'
+		c = sheet.cell(row=28, column=4)
+		c.alignment = Alignment(wrapText=True)
+		c.value = 'A: Bing search API'
 
 	def _write_sheet_azure_services(self):
 		'''Write Azure services worksheet sheet.'''
@@ -103,20 +171,30 @@ class ExcelWriter:
 			row_number += 1
 
 		# Create table.
-		table = self._create_table('AzureServicesArticles', row_number - 1)
+		table = self._create_table(
+			table_name='AzureServicesArticles', 
+			row_number=row_number - 1, 
+			column_letter='C')
 
 		# Add table to sheet.
 		sheet.add_table(table)
 
-	def _create_table(self, table_name, row_count):
+	def _create_table(self, table_name, row_number, column_letter):
 		'''Create and return a table with the given name and row count.'''
 
 		# Create table.
-		table = Table(displayName=table_name, ref=f"A1:C{row_count}")
+		table = Table(
+			displayName=table_name, 
+			ref=f"A1:{column_letter}{row_number}",
+			 totalsRowShown=True)
 
 		# Create a style with striped rows and banded columns
-		style = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False,
-													showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+		style = TableStyleInfo(
+			name="TableStyleMedium9", 
+			showFirstColumn=False,
+			showLastColumn=False, 
+			showRowStripes=True, 
+			showColumnStripes=True)
 
 		# Apply table style.
 		table.tableStyleInfo = style
@@ -177,7 +255,10 @@ class ExcelWriter:
 				row_number += 1
 
 		# Create table.
-		table = self._create_table('TerraformServicesSearchResults', row_number - 1)
+		table = self._create_table(
+			table_name='TerraformServicesSearchResults', 
+			row_number=row_number - 1, 
+			column_letter='D')
 
 		# Add table to sheet.
 		sheet.add_table(table)
