@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
-import bing
+#import bing
+#import ddg
+import local_text_search
 from excel import ExcelWriter
 from colorama import Fore, Back, Style
   
@@ -13,12 +15,20 @@ content = json.loads(raw)
 az_services = []
 
 # TODO: Specify Azure service names to skip - useful for debugging.
+#service_excludes = ['API Management', ]
 service_excludes = []
-service_excludes = ['API Management', ]
 
 article_excludes = [
 	'https://learn.microsoft.com/en-us/answers',
 	'https://learn.microsoft.com/en-us/azure/developer/terraform/provider-version-history-azurerm',
+	'https://learn.microsoft.com/en-us/cli',
+	'https://learn.microsoft.com/en-us/gaming',
+	'https://learn.microsoft.com/en-us/marketplace',
+	'https://learn.microsoft.com/en-us/partner-center/marketplace/azure-partner-customer-usage-attribution',
+	'https://learn.microsoft.com/en-us/powershell',
+	'https://learn.microsoft.com/en-us/rest',
+	'https://learn.microsoft.com/en-us/samples',
+	'https://learn.microsoft.com/en-us/system-center',
 	]
 
 class AzureService:
@@ -45,7 +55,7 @@ class AzureService:
 		# If any article URL is not in the list of articles, add it.
 		for article_url in article_urls:
 			if article_url not in self.articles:
-				if not self.is_article_excluded(article_url, exact_match=False):
+				if len(article_url) and not self.is_article_excluded(article_url, exact_match=False):
 					self.articles.append(article_url)
 		
 	def __str__(self):
@@ -78,8 +88,11 @@ def main():
 			for i, tf_resource_name in enumerate(content[az_service_name]):
 				print(f"\tSearching for '{tf_resource_name}'...", end='')
 
-				found_articles = bing.find_articles(tf_resource_name)
+				#found_articles = bing.find_articles(tf_resource_name)
+				#found_articles = ddg.find_articles(tf_resource_name)
+				found_articles = local_text_search.find_articles(tf_resource_name)
 				print(f"{len(found_articles)} search result(s).")
+
 				az_service.add_search_results(tf_resource_name=tf_resource_name, article_urls=found_articles)
 
 			az_services.append(az_service)
@@ -87,8 +100,8 @@ def main():
 			count_az_services += 1
 			
 			# TODO: Use this to speed up testing.
-			if count_az_services == 11:
-				break
+			#if count_az_services == 2:
+			#	break
 		else:
 			print(Fore.BLUE + f"\nSkipping '{az_service_name}'")
 			print(Fore.WHITE)

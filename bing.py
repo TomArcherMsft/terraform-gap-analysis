@@ -1,5 +1,5 @@
 import os
-import requests
+#import requests
 import json
 import time
 
@@ -15,9 +15,12 @@ def bing_web_search(subscription_key, query):
 
     # get response
     time.sleep(1)
-    response = requests.get(search_url, headers=headers, params=params)
-    response.raise_for_status()
-    return response.json()
+    
+    #DO NOT USE THIS FUNCTION !!!
+    #response = requests.get(search_url, headers=headers, params=params)
+    #response.raise_for_status()
+    #return response.json()
+    return None
 
 def extract_web_pages(search_results):
     web_pages = []

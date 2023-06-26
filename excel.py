@@ -128,7 +128,8 @@ class ExcelWriter:
 		c.value = 'Q: How do you determine if a Terraform resource is in an article?'
 		c = sheet.cell(row=28, column=4)
 		c.alignment = Alignment(wrapText=True)
-		c.value = 'A: Bing search API'
+		c.value = 'A: Currently, the report app searches  a static file built (6/25/2023) from the Bing search API.\n'
+		c.value += 'The next version of this report will use data provided by the Terraform product group.'
 
 	def _write_sheet_azure_services(self):
 		'''Write Azure services worksheet sheet.'''
@@ -162,9 +163,12 @@ class ExcelWriter:
 
 			# Format found articles into single string with newline delimiter.
 			found_articles = ''
+			# For each article URL in the article list.
 			for article_url in az_service.articles:
+				# Add newline delimiter if not first article.
 				if len(found_articles):
 					found_articles += '\n' #'\015'
+				# Add article URL to string.
 				found_articles += f"{article_url}"
 
 			# Write article URLs.
