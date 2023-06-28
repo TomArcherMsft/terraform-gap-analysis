@@ -13,10 +13,12 @@ def bing_web_search(subscription_key, query):
         "count":50,
         "textFormat": "HTML"}
 
-    # get response
+    
+    # Sleep to avoid potential throttling.
     time.sleep(1)
     
     #DO NOT USE THIS FUNCTION !!!
+    # get response
     #response = requests.get(search_url, headers=headers, params=params)
     #response.raise_for_status()
     #return response.json()

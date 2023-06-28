@@ -1,0 +1,5 @@
+AAD B2C,azurerm_aadb2c_directory
+API Management,azurerm_api_management_authorization_server
+API Management,azurerm_api_management_openid_connect_provider
+API Management,azurerm_api_management_logger
+API Management,azurerm_api_management_gateway_host_name_configuration

@@ -1,0 +1,1 @@
+{"TerraformServices": [{"AzureService": "AAD B2C", "keywords": ["azurerm_aadb2c_directory"]}, {"AzureService": "API Management", "keywords": ["azurerm_api_management_authorization_server", "azurerm_api_management_openid_connect_provider", "azurerm_api_management_logger", "azurerm_api_management_gateway_host_name_configuration"]}]}
